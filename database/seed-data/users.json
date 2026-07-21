@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Alice Admin",
+    "email": "alice.admin@support.local",
+    "role": "Admin"
+  },
+  {
+    "name": "Bob Agent",
+    "email": "bob.agent@support.local",
+    "role": "Agent"
+  },
+  {
+    "name": "Carol Requester",
+    "email": "carol.requester@support.local",
+    "role": "Requester"
+  }
+]

@@ -1,13 +1,62 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../app/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
+
+model User {
+  id              String    @id @default(cuid())
+  name            String
+  email           String    @unique
+  role            String
+  createdTickets  Ticket[]  @relation("CreatedTickets")
+  assignedTickets Ticket[]  @relation("AssignedTickets")
+  comments        Comment[]
+}
+
+model Ticket {
+  id           String       @id @default(cuid())
+  title        String
+  description  String
+  priority     Priority
+  status       TicketStatus @default(OPEN)
+  assignedToId String?
+  assignedTo   User?        @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdById  String
+  createdBy    User         @relation("CreatedTickets", fields: [createdById], references: [id], onDelete: Restrict)
+  comments     Comment[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  ticketId    String
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  message     String
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime @default(now())
+
+  @@index([ticketId])
 }
