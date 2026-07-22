@@ -72,7 +72,23 @@ User 1──* Comment (createdBy)
 Ticket 1──* Comment
 ```
 
-## Indexes
+## Status Transitions
+
+Core mandatory transitions:
+
+```
+Open         → In Progress, Cancelled
+In Progress  → Resolved, Cancelled
+Resolved     → Closed
+```
+
+Post-Core enhancement:
+
+```
+Closed       → Open (Reopen)
+```
+
+`Cancelled` is terminal.
 
 - `User.email` — unique
 - `Ticket.status` — supports status filter

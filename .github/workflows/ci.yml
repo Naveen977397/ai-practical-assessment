@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, "cursor/**"]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: src/package-lock.json
+
+      - name: Install build tools for better-sqlite3
+        run: sudo apt-get update && sudo apt-get install -y python3 make g++
+
+      - name: Setup environment
+        run: |
+          cp .env.example .env
+          echo 'JWT_SECRET="ci-jwt-secret-for-github-actions-min-32-chars"' >> .env
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Prepare test database
+        run: npx prisma db push
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build application
+        run: npm run build
+
+      - name: Lint
+        run: npm run lint

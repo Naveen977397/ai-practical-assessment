@@ -22,7 +22,7 @@ REST API contract for Core features. Base path: `/api`.
 
 ## GET /api/users
 
-List seeded users for the acting-user picker.
+List users for the acting-user picker and user management UI.
 
 **Response 200:**
 
@@ -34,36 +34,104 @@ List seeded users for the acting-user picker.
 
 ---
 
+## POST /api/users
+
+Create a user (Stretch).
+
+**Request body:**
+
+```json
+{
+  "name": "string",
+  "email": "string",
+  "role": "string"
+}
+```
+
+**Response 201:** Created user object.
+
+**Response 400:** Validation failure or duplicate email.
+
+---
+
+## GET /api/users/:id
+
+Get a single user (Stretch).
+
+**Response 200:** User object.
+
+**Response 404:** User not found.
+
+---
+
+## PATCH /api/users/:id
+
+Update user fields (Stretch).
+
+**Request body (all optional):**
+
+```json
+{
+  "name": "string",
+  "email": "string",
+  "role": "string"
+}
+```
+
+**Response 200:** Updated user object.
+
+---
+
+## DELETE /api/users/:id
+
+Delete a user (Stretch). Fails if user has created tickets or comments.
+
+**Response 204:** Deleted.
+
+**Response 400:** User has related records.
+
+---
+
 ## GET /api/tickets
 
-List tickets with optional search and status filter.
+List tickets with search, filters, sorting, and pagination (Stretch).
 
 **Query params:**
 
-| Param | Type | Description |
-|-------|------|-------------|
-| q | string? | Keyword search (title + description, partial match) |
-| status | string? | Filter by status enum value; omit for all |
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| q | string? | — | Keyword search (title + description, partial match) |
+| status | string? | — | Filter by status enum value |
+| priority | string? | — | Filter by priority (`LOW`, `MEDIUM`, `HIGH`) |
+| assignedToId | string? | — | Filter by assignee user ID, or `unassigned` |
+| sortBy | string | `createdAt` | `createdAt`, `updatedAt`, `priority`, `title` |
+| sortOrder | string | `desc` | `asc` or `desc` |
+| page | number | `1` | Page number (1-based) |
+| limit | number | `10` | Page size (max 100) |
 
 **Response 200:**
 
 ```json
-[
-  {
-    "id": "...",
-    "title": "...",
-    "description": "...",
-    "priority": "MEDIUM",
-    "status": "OPEN",
-    "assignedTo": { "id": "...", "name": "...", "email": "...", "role": "..." } | null,
-    "createdBy": { "id": "...", "name": "...", "email": "...", "role": "..." },
-    "createdAt": "ISO-8601",
-    "updatedAt": "ISO-8601"
-  }
-]
+{
+  "items": [
+    {
+      "id": "...",
+      "title": "...",
+      "description": "...",
+      "priority": "MEDIUM",
+      "status": "OPEN",
+      "assignedTo": { "id": "...", "name": "...", "email": "...", "role": "..." } | null,
+      "createdBy": { "id": "...", "name": "...", "email": "...", "role": "..." },
+      "createdAt": "ISO-8601",
+      "updatedAt": "ISO-8601"
+    }
+  ],
+  "page": 1,
+  "limit": 10,
+  "total": 42,
+  "totalPages": 5
+}
 ```
-
-Sorted by `createdAt` descending.
 
 ---
 
@@ -150,6 +218,16 @@ Update ticket fields. **Status cannot be changed via this endpoint.**
 
 Change ticket status via state machine.
 
+**Allowed transitions:**
+
+| From | To |
+|------|-----|
+| OPEN | IN_PROGRESS, CANCELLED |
+| IN_PROGRESS | RESOLVED, CANCELLED |
+| RESOLVED | CLOSED |
+| CLOSED | OPEN (Reopen) |
+| CANCELLED | (terminal) |
+
 **Request body:**
 
 ```json
@@ -184,3 +262,11 @@ Add a comment to a ticket.
 **Response 400:** Validation failure.
 
 **Response 404:** Ticket not found.
+
+---
+
+## GET /api/openapi
+
+Returns the OpenAPI 3.0 specification (Stretch).
+
+**Response 200:** `application/yaml` OpenAPI document.

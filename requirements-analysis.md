@@ -92,7 +92,7 @@ In Progress  → Cancelled
 | **FR-SM-02** | Backend shall enforce transitions — valid transitions succeed; invalid transitions are rejected with a clear error. |
 | **FR-SM-03** | Frontend shall expose only valid next-status actions for the current state. |
 | **FR-SM-04** | Frontend shall display meaningful errors when the backend rejects an invalid transition. |
-| **FR-SM-05** | `Closed` and `Cancelled` are terminal states; no further status transitions are allowed. |
+| **FR-SM-05** | `Cancelled` is a terminal state with no further transitions. `Closed` may be reopened to `Open` (post-Core enhancement for mistaken closures). |
 | **FR-SM-06** | Any internal user may change ticket status; assignee-only restrictions do not apply in Core. |
 | **FR-SM-07** | Status may be changed regardless of whether an assignee is set. |
 
@@ -101,8 +101,9 @@ In Progress  → Cancelled
 - `Open` → `Resolved`, `Closed`
 - `In Progress` → `Open`, `Closed`
 - `Resolved` → `Open`, `In Progress`, `Cancelled`
-- `Closed` → any
 - `Cancelled` → any
+
+**Post-Core enhancement:** `Closed` → `Open` (Reopen) is allowed so mistakenly closed tickets can be restored.
 
 ---
 

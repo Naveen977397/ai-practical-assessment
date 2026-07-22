@@ -7,7 +7,7 @@ Layered design inside `src/`:
 ```
 UI (Server + Client Components)
   → API Route Handlers (app/api)
-    → Ticket Service (lib/ticket-service.ts)
+    → Ticket Service (lib/services/)
       → State Machine + Zod Validation
         → Prisma Client → SQLite
 ```
@@ -33,7 +33,7 @@ Core has no auth. A header dropdown selects the acting user (persisted in `local
 
 ### Validation
 
-- **Zod** schemas in `lib/validations/ticket.ts` shared conceptually between API and forms
+- **Zod** schemas in `lib/validations/` shared between API routes
 - Backend always re-validates; frontend validation is UX only
 - Trim strings before length checks
 

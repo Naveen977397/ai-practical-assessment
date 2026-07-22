@@ -136,9 +136,17 @@ Testable acceptance criteria for **Core** requirements. Each criterion uses Give
 **When** the user attempts to transition to `Open`, `In Progress`, or `Cancelled`  
 **Then** the backend rejects the transition
 
-**Given** a ticket in status `Closed` or `Cancelled`  
+**Given** a ticket in status `Closed`  
+**When** the user transitions to `Open` (Reopen)  
+**Then** the transition succeeds and the ticket re-enters the workflow
+
+**Given** a ticket in status `Cancelled`  
 **When** the user attempts any status transition  
 **Then** the backend rejects the transition
+
+**Given** a ticket in status `Closed`  
+**When** the detail view is rendered  
+**Then** only the valid next-status action (`Reopen` → Open) is shown
 
 **Given** a ticket in status `Open`  
 **When** the detail view is rendered  
@@ -222,16 +230,16 @@ Testable acceptance criteria for **Core** requirements. Each criterion uses Give
 
 ## Summary Checklist (Assessment Core Criteria)
 
-| # | Criterion | AC ID |
-|---|-----------|-------|
-| 1 | Create ticket via UI | AC-01 |
-| 2 | View all tickets from database | AC-02 |
-| 3 | Open ticket detail view | AC-03 |
-| 4 | Update fields and reassign | AC-04 |
-| 5 | Add comments | AC-05 |
-| 6 | Valid transitions only; invalid rejected | AC-06, AC-07 |
-| 7 | Keyword search and status filter | AC-08 |
-| 8 | Data survives restart | AC-10 |
-| 9 | Backend validation | AC-09 |
-| 10 | No secrets in repo | AC-11 |
-| 11 | State-machine integration tests pass | AC-12 |
+| # | Criterion | AC ID | Status |
+|---|-----------|-------|--------|
+| 1 | Create ticket via UI | AC-01 | Done |
+| 2 | View all tickets from database | AC-02 | Done |
+| 3 | Open ticket detail view | AC-03 | Done |
+| 4 | Update fields and reassign | AC-04 | Done |
+| 5 | Add comments | AC-05 | Done |
+| 6 | Valid transitions only; invalid rejected | AC-06, AC-07 | Done |
+| 7 | Keyword search and status filter | AC-08 | Done |
+| 8 | Data survives restart | AC-10 | Done |
+| 9 | Backend validation | AC-09 | Done |
+| 10 | No secrets in repo | AC-11 | Done |
+| 11 | State-machine integration tests pass | AC-12 | Done |

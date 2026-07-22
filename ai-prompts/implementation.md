@@ -112,3 +112,68 @@ Added `lib/validations/comment.schema.ts`, `lib/services/comment.service.ts`, an
 
 ### Reason
 User confirmed implementation after status transitions were completed.
+
+## Prompt #6
+
+### Prompt
+Improve the existing UI without changing functionality: fix text visibility and contrast, use a clean professional light theme, consistent color palette, responsive layout, and preserve all business logic.
+
+### AI Response Summary
+Updated `globals.css` with CSS variables and shared component classes (`.app-card`, `.app-input`, `.app-btn-primary`, etc.). Applied across AppHeader, ActingUserPicker, TicketListPanel, CreateTicketForm, TicketDetailPanel, and badges. Updated layout padding for responsive breakpoints.
+
+### Accepted
+- Light slate/blue theme with readable contrast
+- Shared component classes for consistency
+- Responsive layout preserved
+
+### Modified
+- Removed dark mode CSS variables in favor of single light theme
+
+### Rejected
+- None reported
+
+### Reason
+User requested UI polish only — no new features or structural changes.
+
+## Prompt #7
+
+### Prompt
+Fix "Back to tickets" link alignment (icon and text misaligned). Implement reopen functionality for closed tickets.
+
+### AI Response Summary
+Created `BackToTicketsLink` component with SVG chevron and `.app-back-link` flex alignment. Added `CLOSED → OPEN` transition to state machine with "Reopen" action label. Updated integration tests (17 total, all passing).
+
+### Accepted
+- Shared back link component with proper alignment
+- Closed ticket reopen via state machine
+
+### Modified
+- Updated acceptance criteria and docs to reflect reopen as post-Core enhancement
+
+### Rejected
+- Reopen for Cancelled tickets (user specified closed only)
+
+### Reason
+User reported UI bug and requested reopen for mistakenly closed tickets.
+
+## Prompt #8
+
+### Prompt
+Ensure all assessment submission requirements are covered: documentation, prompt history, test results, compliance with Core acceptance criteria.
+
+### AI Response Summary
+Audited repository against assessment rubric. Filled all stub documentation files (candidate-info, tool-workflow, test-strategy, test-results, pr-description, reflection, final-ai-usage-summary, debugging-notes, code-review-notes, review-fixes). Updated implementation-plan status, acceptance criteria checklist, README, and Jest config (`maxWorkers: 1`).
+
+### Accepted
+- Complete submission artifact set
+- Updated test results (17/17 pass)
+- Assessment compliance documentation
+
+### Modified
+- Jest config for reliable test execution without `--runInBand` flag
+
+### Rejected
+- None reported
+
+### Reason
+User requested full assessment compliance verification.

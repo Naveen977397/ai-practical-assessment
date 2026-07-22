@@ -57,9 +57,11 @@ In Progress  → Resolved
 Resolved     → Closed
 Open         → Cancelled
 In Progress  → Cancelled
+Closed       → Open (Reopen — post-Core enhancement)
 ```
 
-- `Closed` and `Cancelled` are **terminal** — no further transitions.
+- `Cancelled` is **terminal** — no further transitions.
+- `Closed` may be reopened to `Open` for mistaken closures.
 - Backend enforces all rules; invalid transitions return error (use 409).
 - Frontend shows only valid next-status actions.
 - Status changes are separate from field updates.
@@ -97,9 +99,10 @@ UI provides a user picker (dropdown) from seeded users. Selected user is `create
 ## Testing (Mandatory)
 
 Integration tests against real DB proving:
-- All 5 valid transitions succeed.
+- All valid transitions succeed (including `Closed` → `Open` reopen).
 - Representative invalid transitions are rejected.
-- Tests live in `tests/` (or `src/` per project convention).
+- Comment creation on tickets (including closed).
+- Tests live in `tests/`; 17 integration tests total.
 
 ---
 

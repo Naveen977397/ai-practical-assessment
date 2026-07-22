@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "file:./data/app.db"
+      JWT_SECRET: "docker-jwt-secret-change-in-production-min-32-chars"
+    volumes:
+      - sqlite-data:/app/data
+
+volumes:
+  sqlite-data:

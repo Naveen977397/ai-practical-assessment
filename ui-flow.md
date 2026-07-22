@@ -56,7 +56,7 @@
 | Open | Start Work (→ In Progress), Cancel |
 | In Progress | Resolve (→ Resolved), Cancel |
 | Resolved | Close (→ Closed) |
-| Closed | (none) |
+| Closed | Reopen (→ Open) |
 | Cancelled | (none) |
 
 ## Error States

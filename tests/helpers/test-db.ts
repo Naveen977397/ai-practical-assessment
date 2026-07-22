@@ -1,5 +1,8 @@
 import { TicketStatus } from "@/app/generated/prisma";
+import { hashPassword } from "@/lib/auth/password";
 import { prisma } from "@/lib/prisma";
+
+const TEST_PASSWORD_HASH = hashPassword("test-password-123");
 
 export async function resetTestDatabase() {
   await prisma.comment.deleteMany();
@@ -13,6 +16,7 @@ export async function seedTestUsers() {
       name: "Test Creator",
       email: `creator-${Date.now()}@test.com`,
       role: "Requester",
+      passwordHash: TEST_PASSWORD_HASH,
     },
   });
   const agent = await prisma.user.create({
@@ -20,6 +24,7 @@ export async function seedTestUsers() {
       name: "Test Agent",
       email: `agent-${Date.now()}@test.com`,
       role: "Agent",
+      passwordHash: TEST_PASSWORD_HASH,
     },
   });
   return { creator, agent };

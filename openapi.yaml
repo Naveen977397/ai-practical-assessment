@@ -1,0 +1,302 @@
+openapi: 3.0.3
+info:
+  title: Support Ticket Management API
+  version: 1.0.0
+  description: REST API for the Support Ticket Management System (Core + Stretch)
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development
+
+paths:
+  /users:
+    get:
+      summary: List users
+      tags: [Users]
+      responses:
+        "200":
+          description: List of users
+    post:
+      summary: Create user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUser"
+      responses:
+        "201":
+          description: User created
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+  /users/{id}:
+    get:
+      summary: Get user by ID
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: User details
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      summary: Update user
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUser"
+      responses:
+        "200":
+          description: Updated user
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      summary: Delete user
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "204":
+          description: User deleted
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tickets:
+    get:
+      summary: List tickets (paginated, filterable)
+      tags: [Tickets]
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/TicketStatus" }
+        - name: priority
+          in: query
+          schema: { $ref: "#/components/schemas/Priority" }
+        - name: assignedToId
+          in: query
+          schema: { type: string }
+          description: User ID or "unassigned"
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [createdAt, updatedAt, priority, title]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 10 }
+      responses:
+        "200":
+          description: Paginated ticket list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedTickets"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+    post:
+      summary: Create ticket
+      tags: [Tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTicket"
+      responses:
+        "201":
+          description: Ticket created
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+  /tickets/{id}:
+    get:
+      summary: Get ticket detail
+      tags: [Tickets]
+      parameters:
+        - $ref: "#/components/parameters/TicketId"
+      responses:
+        "200":
+          description: Ticket with comments
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      summary: Update ticket fields
+      tags: [Tickets]
+      parameters:
+        - $ref: "#/components/parameters/TicketId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTicket"
+      responses:
+        "200":
+          description: Updated ticket
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tickets/{id}/status:
+    patch:
+      summary: Change ticket status (state machine)
+      tags: [Tickets]
+      parameters:
+        - $ref: "#/components/parameters/TicketId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  $ref: "#/components/schemas/TicketStatus"
+      responses:
+        "200":
+          description: Status updated
+        "409":
+          description: Invalid status transition
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tickets/{id}/comments:
+    post:
+      summary: Add comment to ticket
+      tags: [Comments]
+      parameters:
+        - $ref: "#/components/parameters/TicketId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateComment"
+      responses:
+        "201":
+          description: Comment created
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  parameters:
+    TicketId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+    UserId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+
+  responses:
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        details: { type: object }
+
+    Priority:
+      type: string
+      enum: [LOW, MEDIUM, HIGH]
+
+    TicketStatus:
+      type: string
+      enum: [OPEN, IN_PROGRESS, RESOLVED, CLOSED, CANCELLED]
+
+    CreateUser:
+      type: object
+      required: [name, email, role]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { type: string }
+
+    UpdateUser:
+      type: object
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { type: string }
+
+    CreateTicket:
+      type: object
+      required: [title, description, priority, createdById]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        priority: { $ref: "#/components/schemas/Priority" }
+        createdById: { type: string }
+        assignedToId: { type: string, nullable: true }
+
+    UpdateTicket:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        priority: { $ref: "#/components/schemas/Priority" }
+        assignedToId: { type: string, nullable: true }
+
+    CreateComment:
+      type: object
+      required: [message, createdById]
+      properties:
+        message: { type: string }
+        createdById: { type: string }
+
+    PaginatedTickets:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+        page: { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+        totalPages: { type: integer }
