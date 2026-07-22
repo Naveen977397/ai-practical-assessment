@@ -23,3 +23,19 @@ export const STATUS_ACTION_LABELS: Partial<Record<TicketStatus, string>> = {
 };
 
 export const ALL_STATUSES = Object.values(TicketStatus);
+export const ALL_PRIORITIES = Object.values(Priority);
+
+export const SORT_BY_OPTIONS = [
+  "createdAt",
+  "updatedAt",
+  "priority",
+  "title",
+] as const;
+
+export type SortByOption = (typeof SORT_BY_OPTIONS)[number];
+
+export const SORT_ORDER_OPTIONS = ["asc", "desc"] as const;
+
+export type SortOrderOption = (typeof SORT_ORDER_OPTIONS)[number];
+
+export const DEFAULT_PAGE_SIZE = 10;

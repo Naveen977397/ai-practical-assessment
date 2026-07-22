@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Priority } from "@/app/generated/prisma";
-import { useActingUser } from "@/components/ActingUserProvider";
 import { BackToTicketsLink } from "@/components/BackToTicketsLink";
 import { ErrorBanner } from "@/components/ui/badges";
 import { PRIORITY_LABELS } from "@/lib/constants";
@@ -13,7 +12,6 @@ type UserOption = { id: string; name: string };
 
 export function CreateTicketForm() {
   const router = useRouter();
-  const { actingUser } = useActingUser();
   const [users, setUsers] = useState<UserOption[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -24,19 +22,19 @@ export function CreateTicketForm() {
 
   useEffect(() => {
     fetch("/api/users")
-      .then((res) => res.json())
-      .then((data) => setUsers(data))
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setUsers(data);
+        }
+      })
       .catch(() => setError("Failed to load users"));
   }, []);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-
-    if (!actingUser) {
-      setError("Select an acting user before creating a ticket.");
-      return;
-    }
 
     setSubmitting(true);
     try {
@@ -47,7 +45,6 @@ export function CreateTicketForm() {
           title,
           description,
           priority,
-          createdById: actingUser.id,
           assignedToId: assignedToId || null,
         }),
       });

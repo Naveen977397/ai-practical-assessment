@@ -10,8 +10,11 @@ const trimmedString = (min: number, max: number, label: string) =>
       `${label} must be at most ${max} characters`,
     );
 
-export const createCommentSchema = z.object({
+export const createCommentBodySchema = z.object({
   message: trimmedString(1, 2000, "Message"),
+});
+
+export const createCommentSchema = createCommentBodySchema.extend({
   createdById: z.string().min(1, "createdById is required"),
 });
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jsonError, handleServiceError } from "@/lib/api/errors";
 import { validationErrorResponse } from "@/lib/api/validation";
+import { requireAuth } from "@/lib/auth/session";
 import {
   getTicketById,
   updateTicket,
@@ -13,6 +14,7 @@ type RouteContext = {
 
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
+    await requireAuth();
     const { id } = await context.params;
     const ticket = await getTicketById(id);
     return NextResponse.json(ticket);
@@ -23,6 +25,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
+    await requireAuth();
     const { id } = await context.params;
 
     let body: unknown;

@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Priority, TicketStatus } from "@/app/generated/prisma";
 import { BackToTicketsLink } from "@/components/BackToTicketsLink";
-import { useActingUser } from "@/components/ActingUserProvider";
 import {
   ErrorBanner,
   PriorityBadge,
@@ -41,7 +40,6 @@ type TicketDetail = {
 
 export function TicketDetailPanel({ ticketId }: { ticketId: string }) {
   const router = useRouter();
-  const { actingUser } = useActingUser();
   const [ticket, setTicket] = useState<TicketDetail | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,18 +144,12 @@ export function TicketDetailPanel({ ticketId }: { ticketId: string }) {
     event.preventDefault();
     setCommentError(null);
 
-    if (!actingUser) {
-      setCommentError("Select an acting user before commenting.");
-      return;
-    }
-
     try {
       const response = await fetch(`/api/tickets/${ticketId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: commentMessage,
-          createdById: actingUser.id,
         }),
       });
 

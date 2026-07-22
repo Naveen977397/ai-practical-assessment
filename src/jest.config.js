@@ -8,6 +8,8 @@ const config = {
   },
   testMatch: ["**/*.test.ts"],
   setupFilesAfterEnv: ["<rootDir>/../tests/helpers/jest-setup.ts"],
+  maxWorkers: 1,
+  transformIgnorePatterns: ["/node_modules/(?!jose/)"],
 };
 
 module.exports = config;

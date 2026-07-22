@@ -26,6 +26,7 @@ model User {
   name            String
   email           String    @unique
   role            String
+  passwordHash    String
   createdTickets  Ticket[]  @relation("CreatedTickets")
   assignedTickets Ticket[]  @relation("AssignedTickets")
   comments        Comment[]

@@ -6,6 +6,7 @@ import { assertTransition } from "@/lib/ticket-state-machine";
 import type {
   CreateTicketInput,
   ListTicketsQuery,
+  PaginatedTickets,
   TransitionStatusInput,
   UpdateTicketInput,
 } from "@/lib/validations/ticket.schema";
@@ -31,6 +32,16 @@ export async function listTickets(query: ListTicketsQuery) {
     where.status = query.status;
   }
 
+  if (query.priority) {
+    where.priority = query.priority;
+  }
+
+  if (query.assignedToId === "unassigned") {
+    where.assignedToId = null;
+  } else if (query.assignedToId) {
+    where.assignedToId = query.assignedToId;
+  }
+
   if (query.q?.trim()) {
     const term = query.q.trim();
     where.OR = [
@@ -39,11 +50,34 @@ export async function listTickets(query: ListTicketsQuery) {
     ];
   }
 
-  return prisma.ticket.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: ticketInclude,
-  });
+  const page = query.page;
+  const limit = query.limit;
+  const skip = (page - 1) * limit;
+
+  const orderBy: Prisma.TicketOrderByWithRelationInput = {
+    [query.sortBy]: query.sortOrder,
+  };
+
+  const [items, total] = await Promise.all([
+    prisma.ticket.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+      include: ticketInclude,
+    }),
+    prisma.ticket.count({ where }),
+  ]);
+
+  const result: PaginatedTickets<(typeof items)[number]> = {
+    items,
+    page,
+    limit,
+    total,
+    totalPages: total === 0 ? 0 : Math.ceil(total / limit),
+  };
+
+  return result;
 }
 
 export async function getTicketById(id: string) {
