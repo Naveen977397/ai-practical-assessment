@@ -2,28 +2,36 @@
 
 ## Test Scope
 
-Core mandatory testing tier: **integration tests** that prove state-machine rules against real database persistence. No unit test tier in Core scope (Stretch).
-
 | Area | Covered | Method |
 |------|---------|--------|
-| Status state machine (valid transitions) | Yes | Integration tests via `ticket.service.ts` |
-| Status state machine (invalid transitions) | Yes | Integration tests expecting `InvalidStatusTransitionError` |
+| Status state machine (valid transitions) | Yes | Integration + unit tests |
+| Status state machine (invalid transitions) | Yes | Integration + unit tests |
 | Comment creation | Yes | Integration tests via `comment.service.ts` |
+| List API (filters, sort, pagination) | Yes | Integration tests |
+| User CRUD | Yes | Integration tests |
+| Auth (login, signup) | Yes | Integration tests |
 | API route handlers | Indirectly | Tests exercise service layer with real Prisma |
-| UI components | No | Manual verification; out of Core test tier |
-| Field validation (Zod) | Partially | Covered when invalid data hits service layer |
+| UI components | No | Manual verification |
 
 ---
 
 ## Unit Tests
 
-**Not implemented (Core scope).** State machine logic is tested indirectly through integration tests. A Stretch tier would add direct unit tests on `ticket-state-machine.ts` without database I/O.
+**Location:** `tests/unit/state-machine.test.ts`
+
+Direct tests on `lib/ticket-state-machine.ts` without database I/O:
+
+- `canTransition` for valid and invalid pairs
+- `getValidTransitions` per status
+- `assertTransition` throws `InvalidStatusTransitionError`
+
+**Count:** 12 unit tests
 
 ---
 
 ## Component Tests
 
-**Not implemented (Core scope).** UI forms and status buttons were verified manually. Stretch would add React Testing Library tests for form validation and error display.
+**Not implemented.** UI forms and status buttons were verified manually. Stretch tier would add React Testing Library tests for form validation and error display.
 
 ---
 
@@ -34,27 +42,39 @@ Core mandatory testing tier: **integration tests** that prove state-machine rule
 **Database:** Separate SQLite file (`src/test.db`)  
 **Config:** `src/jest.config.js` with `maxWorkers: 1` for serial execution
 
-### State Machine Tests (`state-machine.test.ts`)
+### State Machine Tests (`state-machine.test.ts`) — 13 tests
 
 | Category | Count | Examples |
 |----------|-------|---------|
 | Valid transitions | 6 | Open→In Progress, Resolved→Closed, Closed→Open (Reopen) |
 | Invalid transitions | 7 | Open→Closed, In Progress→Open, Cancelled→Open |
 
-### Comment Tests (`comments.test.ts`)
+### Comment Tests (`comments.test.ts`) — 4 tests
 
 | Test | Purpose |
 |------|---------|
 | Add comment to existing ticket | Basic comment persistence |
 | Reject empty comment | Validation |
-| Reject invalid user | FK validation |
-| Comment on closed ticket | Comments allowed in any status |
+| Allow comments on closed tickets | Comments allowed in any status |
+| Throw when ticket does not exist | Not found handling |
 
-**Total:** 17 integration tests
+### List API Tests (`list-tickets.test.ts`) — 6 tests
+
+Keyword search, status/priority/assignee filters, pagination.
+
+### User CRUD Tests (`users.test.ts`) — 5 tests
+
+Create, update, delete, duplicate email rejection, delete protection.
+
+### Auth Tests (`auth.test.ts`) — 4 tests
+
+Valid login, invalid password, signup with Requester role, duplicate email rejection.
+
+**Total:** 44 tests across 6 suites
 
 ### Test Helpers
 
-- `tests/helpers/jest-setup.ts` — sets `DATABASE_URL` to test DB
+- `tests/helpers/jest-setup.ts` — sets `DATABASE_URL` to test DB, runs migrations
 - `tests/helpers/test-db.ts` — `resetTestDatabase()`, `seedTestUsers()`, `createTestTicket()`
 
 ---
@@ -67,12 +87,14 @@ Covered within integration tests:
 - Reverse transitions (In Progress→Open)
 - Terminal state attempts (Cancelled→Open)
 - Reopen from Closed (Closed→Open)
+- Duplicate email on signup
+- Delete user with related tickets blocked
 
-Not covered (acceptable for Core):
+Not covered:
 
 - Concurrent status transitions
-- Extremely long title/description strings (Zod max-length tested at schema level only)
 - Network failure simulation in UI
+- E2E browser tests
 
 ---
 
@@ -80,12 +102,10 @@ Not covered (acceptable for Core):
 
 | Gap | Reason |
 |-----|--------|
-| Unit tests on pure state machine | Core mandates integration tier only; state machine is small and fully covered via service layer |
 | API route HTTP status code tests | Service layer tests prove business rules; routes are thin wrappers |
-| UI/component tests | Not in Core mandatory tier |
-| E2E browser tests | Out of scope; manual UI verification sufficient for assessment |
-| Load/performance tests | Not required for Core NFRs |
-| Auth/authorization tests | Auth is Stretch; not implemented |
+| UI/component tests | Not in mandatory tier; manual verification sufficient |
+| E2E browser tests | Out of scope for assessment |
+| Load/performance tests | Not required for NFRs |
 
 ---
 
@@ -96,6 +116,6 @@ cd src
 npm test
 ```
 
-Expected: 2 test suites, 17 tests, all passing.
+Expected: 6 test suites, 44 tests, all passing.
 
 See [`test-results.md`](test-results.md) for latest run output.

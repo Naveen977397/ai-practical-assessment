@@ -9,6 +9,64 @@ How AI (Cursor) was used across the full assessment lifecycle.
 
 ---
 
+## Part A: AI Workflow Foundation
+
+### 1. Primary AI tool used
+
+**Cursor** (Agent mode) — used for planning, design, implementation, testing, debugging, code review, and documentation.
+
+### 2. How I provide project context
+
+- Persistent spec: `tool-specific/cursor-workflow/spec.md`
+- Assessment docs in prompts: `requirements-analysis.md`, `acceptance-criteria.md`
+- Scoped prompts with explicit stack and scope boundaries (Core vs Stretch)
+- Append-only prompt history in `ai-prompts/`
+
+### 3. How I use AI for requirement analysis
+
+AI acted as senior BA to produce `requirements-analysis.md`. I reviewed assumptions and approved defaults before implementation.
+
+### 4. How I use AI for planning and design
+
+AI drafted data model, API contract, UI flow, and design notes. I validated state machine rules and endpoint separation before coding.
+
+### 5. How I use AI for code generation
+
+Incremental prompts per layer (schema → API → tests → UI → auth). Explicit scope per prompt; reviewed every diff.
+
+### 6. How I validate AI-generated code
+
+- `npm test` after every backend change (44 tests)
+- `npm run build` for TypeScript/Next.js errors
+- Manual UI smoke tests (login, ticket lifecycle, comments)
+- Cross-check against AC-01 through AC-12
+- Reject suggestions that fail tests or violate scope
+
+### 7. How I use AI for testing
+
+AI scaffolded integration and unit tests. I verified against real SQLite. Fixed Jest flakiness with AI diagnosis.
+
+### 8. How I use AI for debugging
+
+AI helped with Prisma 7 adapter, native module issues, auth redirects, and cookie restrictions. Documented in `debugging-notes.md`.
+
+### 9. How I use AI for code review
+
+AI-assisted self-review of state machine, auth security, and stretch regressions. Findings in `code-review-notes.md`.
+
+### 10. What information I avoid sharing with AI
+
+- Production API keys, passwords, JWT secrets
+- Real customer data or PII
+- Internal company credentials
+- `.env` file contents (only variable names/requirements)
+
+### 11. How I would reuse this workflow in a real project
+
+Repo structure + spec first → plan → design → implement in layers → test after each change → log prompts → self-review → CI on every push.
+
+---
+
 ## Tool Selection
 
 **Primary tool:** Cursor (Agent mode)  

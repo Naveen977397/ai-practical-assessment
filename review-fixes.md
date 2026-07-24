@@ -8,7 +8,7 @@ Changes made after AI-assisted code review and assessment compliance check.
 
 **Issue:** Parallel Jest workers caused flaky integration test failures against shared SQLite test DB.  
 **Fix:** Added `maxWorkers: 1` to `src/jest.config.js`.  
-**Verified:** 17/17 tests pass consistently with `npm test`.
+**Verified:** 44/44 tests pass consistently with `npm test`.
 
 ---
 
@@ -49,6 +49,14 @@ Changes made after AI-assisted code review and assessment compliance check.
 **Issue:** `implementation-plan.md` showed phases as "Pending" despite completion.  
 **Fix:** Updated all phases to "Done" with milestone summary.  
 **Verified:** Plan reflects actual project state.
+
+---
+
+## Fix 7: Acceptance Criteria and Documentation Alignment
+
+**Issue:** AC-01 referenced acting-user picker; several docs still described Core-only design (17 tests, no auth).  
+**Fix:** Updated AC-01 for JWT auth; aligned `ui-flow.md`, `design-notes.md`, `test-strategy.md`, `api-contract.md`, `spec.md`, and `tasks.md` with final implementation.  
+**Verified:** Documentation matches code and 44-test suite.
 
 ---
 

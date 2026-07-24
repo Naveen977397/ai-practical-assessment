@@ -1,6 +1,6 @@
 # api-contract
 
-REST API contract for Core features. Base path: `/api`.
+REST API contract. Base path: `/api`. All endpoints except auth and public pages require a valid JWT session cookie.
 
 ## Error Response Format
 
@@ -14,15 +14,48 @@ REST API contract for Core features. Base path: `/api`.
 | Status | When |
 |--------|------|
 | 400 | Validation failure |
+| 401 | Not authenticated |
+| 403 | Insufficient permissions |
 | 404 | Resource not found |
 | 409 | Invalid status transition |
 | 500 | Unexpected server error |
 
 ---
 
+## Authentication Endpoints
+
+All auth endpoints are public (no session required).
+
+### POST /api/auth/login
+
+Sign in with email and password. Sets httpOnly JWT cookie.
+
+**Request body:** `{ "email": "string", "password": "string" }`  
+**Response 200:** `{ "user": { "id", "name", "email", "role" } }`  
+**Response 400:** Invalid credentials
+
+### POST /api/auth/signup
+
+Register a new user (default role: Requester). Sets httpOnly JWT cookie.
+
+**Request body:** `{ "name", "email", "password", "confirmPassword" }`  
+**Response 201:** `{ "user": { ... } }`  
+**Response 400:** Validation failure or duplicate email
+
+### POST /api/auth/logout
+
+Clears the auth cookie. **Response 200:** `{ "success": true }`
+
+### GET /api/auth/me
+
+Returns the current authenticated user.  
+**Response 200:** `{ "user": { ... } }` | **Response 401:** Not authenticated
+
+---
+
 ## GET /api/users
 
-List users for the acting-user picker and user management UI.
+List users for assignee dropdowns and admin user management UI. Requires authentication.
 
 **Response 200:**
 
@@ -137,7 +170,7 @@ List tickets with search, filters, sorting, and pagination (Stretch).
 
 ## POST /api/tickets
 
-Create a ticket (status defaults to `OPEN`).
+Create a ticket (status defaults to `OPEN`). `createdBy` is set server-side from the authenticated session.
 
 **Request body:**
 
@@ -146,7 +179,6 @@ Create a ticket (status defaults to `OPEN`).
   "title": "string",
   "description": "string",
   "priority": "LOW" | "MEDIUM" | "HIGH",
-  "createdById": "string",
   "assignedToId": "string | null"
 }
 ```
@@ -246,14 +278,13 @@ Change ticket status via state machine.
 
 ## POST /api/tickets/:id/comments
 
-Add a comment to a ticket.
+Add a comment to a ticket. `createdBy` is set server-side from the authenticated session.
 
 **Request body:**
 
 ```json
 {
-  "message": "string",
-  "createdById": "string"
+  "message": "string"
 }
 ```
 

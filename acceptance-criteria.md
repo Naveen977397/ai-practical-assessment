@@ -8,9 +8,9 @@ Testable acceptance criteria for **Core** requirements. Each criterion uses Give
 
 **Maps to:** FR-TC-01–05, FR-VE-01
 
-**Given** the application is running and seeded users exist  
-**When** the user selects an acting user, enters a valid title, description, and priority, and submits the create form  
-**Then** a new ticket is persisted with status `Open`, the selected user as `createdBy`, and the ticket appears in the ticket list
+**Given** the application is running and the user is signed in  
+**When** the user enters a valid title, description, and priority, and submits the create form  
+**Then** a new ticket is persisted with status `Open`, the authenticated user as `createdBy`, and the ticket appears in the ticket list
 
 **Given** the user submits the create form with a missing or whitespace-only title  
 **When** the backend validates the request  

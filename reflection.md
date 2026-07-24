@@ -72,6 +72,7 @@ The hardest and most important piece is the **status state machine** — a pure 
 4. Rate limiting on auth endpoints
 5. Migrate from SQLite to PostgreSQL for production deployment
 6. Migrate middleware to Next.js 16 `proxy` convention (deprecation warning observed)
+7. Fix ESLint violations (300+ errors; lint step deferred in CI)
 
 ---
 

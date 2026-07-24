@@ -291,3 +291,18 @@ These were raised during analysis. Defaults in §3 apply unless the Product Owne
 | Backend validation prevents invalid records | FR-VE-01, NFR-03 |
 | No secrets committed to repo | NFR-05 |
 | State-machine integration tests pass | FR-TS-01–02, NFR-06 |
+
+---
+
+## Implementation Notes (Final)
+
+The following Core assumptions were superseded during Stretch/Auth implementation:
+
+| Original (Core) | Final Implementation |
+|-----------------|------------------------|
+| FR-TC-03: `createdBy` from acting-user picker | `createdBy` set server-side from JWT session |
+| A-02: UI user picker, no auth | JWT login/signup with protected routes |
+| Users seeded only, no CRUD UI | Admin user management at `/users` |
+| 17 integration tests | 44 tests (integration + unit + auth) |
+
+Core acceptance criteria remain satisfied; auth and stretch exceed original scope.

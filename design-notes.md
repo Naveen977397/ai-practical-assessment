@@ -5,11 +5,13 @@
 Layered design inside `src/`:
 
 ```
-UI (Server + Client Components)
-  → API Route Handlers (app/api)
-    → Ticket Service (lib/services/)
-      → State Machine + Zod Validation
-        → Prisma Client → SQLite
+Middleware (JWT route protection)
+  → UI (Server + Client Components)
+    → API Route Handlers (app/api)
+      → Auth Session (lib/auth/session.ts)
+        → Services (lib/services/)
+          → State Machine + Zod Validation
+            → Prisma Client → SQLite
 ```
 
 ## Key Decisions
@@ -20,16 +22,23 @@ Status changes use `PATCH /api/tickets/:id/status`, not the general update endpo
 
 ### State machine as pure module
 
-`lib/ticket-state-machine.ts` is a pure function module with no Prisma dependency. Integration tests exercise it through `ticket-service.ts` with a real database, satisfying FR-TS-02.
+`lib/ticket-state-machine.ts` is a pure function module with no Prisma dependency. Integration tests exercise it through `ticket-service.ts` with a real database; unit tests cover the module directly without I/O.
 
-### Acting user without authentication
+### JWT authentication (Stretch)
 
-Core has no auth. A header dropdown selects the acting user (persisted in `localStorage`). The client sends `createdById` explicitly on create and comment requests. No server-side session.
+Replaced the Core acting-user picker with JWT auth:
+
+- Login/signup via `POST /api/auth/login` and `POST /api/auth/signup`
+- Session stored in httpOnly cookie (`auth_token`, 8h expiry)
+- `middleware.ts` protects all routes except `/login`, `/signup`, and auth APIs
+- Server-side auth guard in `(app)/layout.tsx` via `getSessionUser()`
+- `createdById` set from JWT in services — client cannot spoof identity
+- Admin role gates `/users` page and user mutation APIs
 
 ### Server vs Client Components
 
-- **Server Components:** initial ticket list data, ticket detail fetch
-- **Client Components:** forms, search/filter interactions, status buttons, user picker, error banners
+- **Server Components:** app layout auth guard, login/signup session checks
+- **Client Components:** forms, search/filter interactions, status buttons, auth provider, error banners
 
 ### Validation
 
@@ -42,18 +51,31 @@ Core has no auth. A header dropdown selects the acting user (persisted in `local
 | Code | Meaning | UI treatment |
 |------|---------|--------------|
 | 400 | Validation | Inline field errors or form banner |
+| 401 | Unauthenticated | Redirect to login |
+| 403 | Forbidden | Permission denied message |
 | 404 | Not found | Dedicated not-found state |
 | 409 | Invalid transition | Status action error banner |
 | 500 | Server error | Generic error message |
 
 ### Search on SQLite
 
-SQLite `LIKE` is case-insensitive for ASCII. Prisma `contains` uses `LIKE` under the hood — no extra normalization needed for Core scope.
+SQLite `LIKE` is case-insensitive for ASCII. Prisma `contains` uses `LIKE` under the hood — no extra normalization needed.
 
 ### Test database
 
-Integration tests use a separate SQLite file (`test.db`) with migrations applied before the suite and data reset between tests.
+Integration tests use a separate SQLite file (`test.db`) with migrations applied before the suite and data reset between tests. Jest runs with `maxWorkers: 1` to avoid parallel contention.
 
-## Out of Scope Reminders
+## Stretch Features Implemented
 
-No auth, no user CRUD UI, no pagination, no delete operations, no unit test tier in Core.
+- Paginated list API with priority/assignee filters and sorting
+- User CRUD API and admin UI
+- OpenAPI spec and `/api-docs` page
+- Docker and GitHub Actions CI
+- Unit tests on state machine module
+
+## Known Limitations
+
+- No ticket/comment delete operations
+- No optimistic locking (last write wins)
+- ESLint has known violations (lint step removed from CI; deferred cleanup)
+- SQLite only (sufficient for assessment scope)
